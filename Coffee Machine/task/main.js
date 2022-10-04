@@ -19,11 +19,17 @@ ${current.milk} ml of milk
 ${current.coffeeBeans} g of coffee beans
 ${current.cups} disposable cups
 $${current.money} of money`);
+    return current;
 }
 
 function getChoice () {
-    console.log("Write action (buy, fill, take):");
+    console.log("Write action (buy, fill, take, remaining, exit):");
     return input();
+}
+
+function isEnough (current, required) {
+    return current.water >= required.water && current.milk >= required.milk
+        && current.coffeeBeans >= required.coffeeBeans && current.cups > 0;
 }
 
 function actionBuy (current) {
@@ -48,26 +54,49 @@ function actionBuy (current) {
         money: 6
     };
 
-    console.log('What do you want to buy? 1 - espresso, 2 - latte, 3 - cappuccino:');
-    let answer = Number(input());
+    console.log('What do you want to buy? 1 - espresso, 2 - latte, 3 - cappuccino, back - to main menu:');
+    let answer = input();
     var coffee;
     switch (answer) {
-        case 1:
+        case '1':
             coffee = espresso;
             break;
-        case 2:
+        case '2':
             coffee = latte;
             break;
-        case 3:
+        case '3':
             coffee = cappuccino;
             break;
+        case 'back':
+            return current;
     }
-    current.water -= coffee.water;
-    current.milk -= coffee.milk;
-    current.coffeeBeans -= coffee.coffeeBeans;
-    current.cups--;
-    current.money += coffee.money;
+
+    if (isEnough(current, coffee)){
+        console.log('I have enough resources, making you a coffee!');
+        current.water -= coffee.water;
+        current.milk -= coffee.milk;
+        current.coffeeBeans -= coffee.coffeeBeans;
+        current.cups--;
+        current.money += coffee.money;
+    } else {
+        var ingredient;
+        if (current.water < coffee.water){
+            ingredient = 'water';
+        }
+        if (current.milk < coffee.milk){
+            ingredient = 'milk';
+        }
+        if (current.coffeeBeans < coffee.coffeeBeans){
+            ingredient = 'coffee beans';
+        }
+        if (current.cups < 1){
+            ingredient = 'cups';
+        }
+        console.log(`Sorry, not enough ${ingredient}!`)
+    }
+
     return current;
+
 }
 
 function actionFill (current) {
@@ -89,23 +118,31 @@ function actionTake (current) {
 }
 
 
-printInventory(inventory);
-console.log();
-let choice = getChoice();
 let action;
-
-switch (choice) {
-    case 'buy':
-        action = actionBuy;
+let exit = false;
+while (true) {
+    console.log();
+    let choice = getChoice();
+    console.log();
+    switch (choice) {
+        case 'buy':
+            action = actionBuy;
+            break;
+        case 'fill':
+            action = actionFill;
+            break;
+        case 'take':
+            action = actionTake;
+            break;
+        case 'remaining':
+            action = printInventory;
+            break;
+        case 'exit':
+            exit = true;
+            break;
+    }
+    if (exit) {
         break;
-    case 'fill':
-        action = actionFill;
-        break;
-    case 'take':
-        action = actionTake;
-        break;
+    }
+    inventory = action(inventory);
 }
-inventory = action(inventory);
-console.log();
-printInventory(inventory);
-
