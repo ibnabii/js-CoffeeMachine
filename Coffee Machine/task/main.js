@@ -2,7 +2,7 @@
 // Use "input(str)" to print some text before requesting input
 // You will need this in the following stages
 const input = require('sync-input');
-
+// stage 6 is not tested :(
 
 let inventory = {
     water: 400,
