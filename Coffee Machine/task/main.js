@@ -3,73 +3,109 @@
 // You will need this in the following stages
 const input = require('sync-input');
 
-function howMuchCoffee () {
-    console.log("Write how many cups of coffee you will need:");
+
+let inventory = {
+    water: 400,
+    milk: 540,
+    coffeeBeans: 120,
+    money: 550,
+    cups: 9
+};
+
+function printInventory (current) {
+    console.log(`The coffee machine has:
+${current.water} ml of water
+${current.milk} ml of milk
+${current.coffeeBeans} g of coffee beans
+${current.cups} disposable cups
+$${current.money} of money`);
+}
+
+function getChoice () {
+    console.log("Write action (buy, fill, take):");
     return input();
 }
 
-function calculateIngredients (cups) {
-    return {
-        water: 200 * cups,
-        milk: 50 * cups,
-        coffeeBeans: 15 * cups
+function actionBuy (current) {
+    var espresso = {
+        water: 250,
+        milk: 0,
+        coffeeBeans: 16,
+        money: 4
     };
-}
 
-function printIngredients (ingredients) {
-    console.log(`${ingredients.water} ml of water`);
-    console.log(`${ingredients.milk} ml of milk`);
-    console.log(`${ingredients.coffeeBeans} ml of coffee beans`);
-}
-
-function askHowMany (ingredient) {
-    let unit;
-    if (['water', 'milk'].includes(ingredient)) {
-        unit = 'ml';
-    } else {
-        unit = 'grams';
-    }
-    console.log(`Write how many ${unit} of ${ingredient} the coffee machine has:`);
-    return input();
-}
-
-function getInventory () {
-    return {
-      water: askHowMany('water'),
-      milk: askHowMany('milk'),
-      coffeeBeans: askHowMany('coffeeBeans')
+    var latte = {
+        water: 350,
+        milk: 75,
+        coffeeBeans: 20,
+        money: 7
     };
+
+    var cappuccino = {
+        water: 200,
+        milk: 100,
+        coffeeBeans: 12,
+        money: 6
+    };
+
+    console.log('What do you want to buy? 1 - espresso, 2 - latte, 3 - cappuccino:');
+    let answer = Number(input());
+    var coffee;
+    switch (answer) {
+        case 1:
+            coffee = espresso;
+            break;
+        case 2:
+            coffee = latte;
+            break;
+        case 3:
+            coffee = cappuccino;
+            break;
+    }
+    current.water -= coffee.water;
+    current.milk -= coffee.milk;
+    current.coffeeBeans -= coffee.coffeeBeans;
+    current.cups--;
+    current.money += coffee.money;
+    return current;
 }
 
-function checkCapability (inv, req, cups) {
-    let max_output = [];
-    max_output.push(inv.water / req.water);
-    max_output.push(inv.milk / req.milk);
-    max_output.push(inv.coffeeBeans / req.coffeeBeans);
-    //console.log(inv, req, cups, max_output)
-
-    let total = Math.floor(Math.min.apply(Math, max_output));
-    if (total < cups) {
-        console.log(`No, I can make only ${total} cups of coffee`);
-        return;
-    }
-    if (total == cups) {
-        console.log("Yes, I can make that amount of coffee");
-        return;
-    }
-    if (total > cups) {
-        console.log(`Yes, I can make that amount of coffee (and even ${total - cups} more than that)`);
-        return;
-    }
+function actionFill (current) {
+    console.log('Write how many ml of water you want to add:');
+    current.water += Number(input());
+    console.log('Write how many ml of milk you want to add:');
+    current.milk += Number(input());
+    console.log('Write how many grams of coffee beans you want to add:');
+    current.coffeeBeans += Number(input());
+    console.log('Write how many disposable cups you want to add:');
+    current.cups += Number(input());
+    return current;
 }
 
-let inventory = getInventory();
-let cups = howMuchCoffee();
-let requirements = calculateIngredients(1);
-checkCapability(inventory, requirements, cups);
+function actionTake (current) {
+    console.log(`I gave you $${current.money}`);
+    current.money = 0;
+    return current;
+}
 
-/*
-// output for stage 2
-console.log(`For ${cups} cups of coffee you will need:`);
-printIngredients(calculateIngredients(cups));
- */
+
+printInventory(inventory);
+console.log();
+let choice = getChoice();
+let action;
+
+switch (choice) {
+    case 'buy':
+        action = actionBuy;
+        break;
+    case 'fill':
+        action = actionFill;
+        break;
+    case 'take':
+        action = actionTake;
+        break;
+}
+inventory = action(inventory);
+console.log();
+printInventory(inventory);
+
